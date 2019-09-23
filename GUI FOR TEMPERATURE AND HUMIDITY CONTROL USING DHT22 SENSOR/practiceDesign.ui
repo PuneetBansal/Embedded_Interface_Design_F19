@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>819</width>
-    <height>763</height>
+    <width>838</width>
+    <height>504</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -434,16 +434,6 @@
      <string>SELECT GRAPH</string>
     </property>
    </widget>
-   <widget class="QGraphicsView" name="graphics_graph">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>490</y>
-      <width>871</width>
-      <height>192</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="Line" name="line">
     <property name="geometry">
      <rect>
@@ -595,40 +585,11 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QLineEdit" name="output_window">
-    <property name="geometry">
-     <rect>
-      <x>490</x>
-      <y>120</y>
-      <width>241</width>
-      <height>141</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_6">
-    <property name="geometry">
-     <rect>
-      <x>80</x>
-      <y>460</y>
-      <width>68</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>11</pointsize>
-      <italic>true</italic>
-     </font>
-    </property>
-    <property name="text">
-     <string>GRAPH</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>560</x>
-      <y>90</y>
+      <x>590</x>
+      <y>120</y>
       <width>141</width>
       <height>22</height>
      </rect>
@@ -640,7 +601,17 @@
      </font>
     </property>
     <property name="text">
-     <string>Output Window</string>
+     <string>Feedback Window</string>
+    </property>
+   </widget>
+   <widget class="QPlainTextEdit" name="plainTextEdit_2">
+    <property name="geometry">
+     <rect>
+      <x>520</x>
+      <y>150</y>
+      <width>251</width>
+      <height>81</height>
+     </rect>
     </property>
    </widget>
   </widget>
@@ -649,7 +620,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>819</width>
+     <width>838</width>
      <height>28</height>
     </rect>
    </property>

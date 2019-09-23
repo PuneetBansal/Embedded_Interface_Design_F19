@@ -5,13 +5,13 @@
 # Created by: PyQt5 UI code generator 5.11.3
 #
 # WARNING! All changes made in this file will be lost!
-import pyqtgraph as pg
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(819, 763)
+        MainWindow.resize(838, 504)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.GetValueButton = QtWidgets.QPushButton(self.centralwidget)
@@ -163,10 +163,6 @@ class Ui_MainWindow(object):
         font.setItalic(True)
         self.label_3.setFont(font)
         self.label_3.setObjectName("label_3")
-        self.graphics_graph = pg.PlotWidget(self.centralwidget)
-        #self.graphics_graph = QtWidgets.QGraphicsView(self.centralwidget)
-        self.graphics_graph.setGeometry(QtCore.QRect(20, 490, 871, 192))
-        self.graphics_graph.setObjectName("graphics_graph")
         self.line = QtWidgets.QFrame(self.centralwidget)
         self.line.setGeometry(QtCore.QRect(50, 100, 20, 191))
         self.line.setFrameShape(QtWidgets.QFrame.VLine)
@@ -226,26 +222,19 @@ class Ui_MainWindow(object):
         self.line_10.setFrameShape(QtWidgets.QFrame.HLine)
         self.line_10.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_10.setObjectName("line_10")
-        self.output_window = QtWidgets.QLineEdit(self.centralwidget)
-        self.output_window.setGeometry(QtCore.QRect(490, 120, 241, 141))
-        self.output_window.setObjectName("output_window")
-        self.label_6 = QtWidgets.QLabel(self.centralwidget)
-        self.label_6.setGeometry(QtCore.QRect(80, 460, 68, 22))
-        font = QtGui.QFont()
-        font.setPointSize(11)
-        font.setItalic(True)
-        self.label_6.setFont(font)
-        self.label_6.setObjectName("label_6")
         self.label_5 = QtWidgets.QLabel(self.centralwidget)
-        self.label_5.setGeometry(QtCore.QRect(560, 90, 141, 22))
+        self.label_5.setGeometry(QtCore.QRect(590, 120, 141, 22))
         font = QtGui.QFont()
         font.setPointSize(11)
         font.setItalic(True)
         self.label_5.setFont(font)
         self.label_5.setObjectName("label_5")
+        self.plainTextEdit_2 = QtWidgets.QPlainTextEdit(self.centralwidget)
+        self.plainTextEdit_2.setGeometry(QtCore.QRect(520, 150, 251, 81))
+        self.plainTextEdit_2.setObjectName("plainTextEdit_2")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 819, 28))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 838, 28))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -275,6 +264,5 @@ class Ui_MainWindow(object):
         self.Celsius_farenhiet.setText(_translate("MainWindow", "F-C/C-F"))
         self.label_3.setText(_translate("MainWindow", "SELECT GRAPH"))
         self.label_4.setText(_translate("MainWindow", "THRESHOLD"))
-        self.label_6.setText(_translate("MainWindow", "GRAPH"))
-        self.label_5.setText(_translate("MainWindow", "Output Window"))
+        self.label_5.setText(_translate("MainWindow", "Feedback Window"))
 
