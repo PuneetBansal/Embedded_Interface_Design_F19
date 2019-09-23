@@ -73,5 +73,13 @@ On a raspbian loaded pi perform these operations:
  ## ADDITIONAL FEATURES
  * Single button press to change the entire GUI from displaying any temeprature data in degree C to F and back again. 
 
-
+## REFERENCES: 
+* MySQL link : https://pimylifeup.com/raspberry-pi-mysql/  
+* Python MYSql link : https://www.w3schools.com/python/python_mysql_create_db.asp
+* For timestamp: https://www.pythonforbeginners.com/basics/python-datetime-timedelta/
+* Temperature Sensor: https://pimylifeup.com/raspberry-pi-humidity-sensor-dht22/
+* Matplotlib: https://matplotlib.org/tutorials/introductory/pyplot.html
+* Primary Key :http://www.mysqltutorial.org/mysql-primary-key/
+* Qtimer: https://doc.qt.io/qtforpython/PySide2/QtCore/QTimer.html
+* Python: https://www.geeksforgeeks.org/python-programming-language/
 
