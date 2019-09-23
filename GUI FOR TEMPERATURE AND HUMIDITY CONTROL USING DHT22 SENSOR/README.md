@@ -1,6 +1,6 @@
 # GUI FOR TEMPERATURE AND HUMIDITY CONTROL USING DHT22 SENSOR
-                                              Contributor : Puneet Bansal , Amogh Shrikhande
-                                              Professor   : Bruce Montgomery
+                                           Contributor : Puneet Bansal , Amogh Shrikhande
+                                           Professor   : Bruce Montgomery
 
 Python based Graphical User Interface (GUI) using QT and MySQL on Raspberry Pi 3 to talk to a DHT22 Temperature and Humidity Sensor and graphical representation using matplotlib.
 
