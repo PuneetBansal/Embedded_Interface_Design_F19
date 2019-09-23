@@ -55,15 +55,16 @@ mycursor = mydb.cursor()
 mycursor.execute("CREATE TABLE IF NOT EXISTS tempAndHumidValues (ID INT(11) NOT NULL AUTO_INCREMENT, timestamp VARCHAR(255) NOT NULL , temp VARCHAR(255), humid VARCHAR(255), PRIMARY KEY (ID))")
 sql = "INSERT INTO tempAndHumidValues (temp, humid, timestamp) VALUES (%s, %s, %s)"
 
-
+						
+class mywindow(QtWidgets.QMainWindow): 
+	global mycursor,temp1,humid,i,j,sql,celsius
+		
 #	@param	: self
 #	@desc	: Function that gets called when Get Value button is pressed.Takes humidity and temperature 
 #				values from the sensor and retries for 5 times if it is not able to fetch value. if the 
 #					values is not NULL, then the temperature (in C or F), humidity and timestamp values are updated 
 #						on the GUI
-						
-class mywindow(QtWidgets.QMainWindow): 
-	global mycursor,temp1,humid,i,j,sql,celsius
+
 	def GetValueButtonFxn(self):
 		global celsius
 		print("GetValueButtonClicked")
@@ -119,7 +120,7 @@ class mywindow(QtWidgets.QMainWindow):
 # @desc		: Function that gets called when GetTemperatureGraph button is pressed.Fetches the last 10
 #				temperature values from the database and plots a graph using matplotlib. 
 	
-	
+
 	def temp_graph(self):
 		self.ui.plainTextEdit_2.setPlainText("Get Temperature Graph button pressed")
 		mycursor.execute("SELECT temp FROM tempAndHumidValues order by ID desc limit 10")
