@@ -55,6 +55,10 @@ On a raspbian loaded pi perform these operations:
 #### Installing MatplotLib for graphs and charts
 * *pip install matplotlib*
 
+#### Installing pyqt5
+* *sudo apt-get install qt5-default pyqt5-dev pyqt5-dev-tools*
+* *sudo apt-get install qttools5-dev-tools*
+
 ## HOW TO RUN THE CODE
 * Clone the repository. 
 * Run the Application by using:
