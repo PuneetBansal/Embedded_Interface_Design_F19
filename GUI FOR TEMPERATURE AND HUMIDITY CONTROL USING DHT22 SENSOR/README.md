@@ -57,8 +57,8 @@ On a raspbian loaded pi perform these operations:
 
 ## HOW TO RUN THE CODE
 * Clone the repository. 
-* Run the file GuiPrac.py by using:
-  * *python3 GuiPrac.py*
+* Run the Application by using:
+  * *python3 Application.py*
   
 ## PROJECT WORK
 * Puneet
