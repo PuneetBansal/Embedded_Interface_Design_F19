@@ -115,3 +115,6 @@ On a raspbian loaded pi perform these operations:
 * Converting string to javascript dictionary: https://stackoverflow.com/questions/31892971/converting-string-to-javascript-dictionary
 * Shell scripting: https://stackoverflow.com/questions/28549641/run-multiple-python-scripts-concurrently
 * Html graph: https://canvasjs.com/html5-javascript-line-chart/
+* NodeJs talking to mysql: https://www.w3schools.com/nodejs/nodejs_mysql.asp
+* NodeJs Webserver : https://www.pubnub.com/blog/nodejs-websocket-programming-examples/
+
