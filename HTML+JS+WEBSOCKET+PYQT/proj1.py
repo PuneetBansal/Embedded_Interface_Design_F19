@@ -1,5 +1,5 @@
 '''
-Name		:GuiPrac.py
+Name		:proj1.py
 Author		:Puneet Bansal and Amogh Shrikhande
 Description	:Graphical User Interface using Qt5 and MySQL on Raspberry Pi 3 to talk to DHT22 
 				Temperature and Humidity Sensor and graphical representation using matplotlib. 
@@ -82,52 +82,41 @@ def thread_function(name):
     tornado.ioloop.IOLoop.instance().start()
  
 class WSHandler(tornado.websocket.WebSocketHandler):
-        
-    def open(self):
-        print('new connection')
-    #When message is recieved from a client call this function and connection is open 
-    def on_message(self, message):
-        
-        if message == "Current values request from client":
-            print('message received:',message)
-            humidity,temperature = Adafruit_DHT.read_retry(DHT_SENSOR,DHT_PIN)
-            humidity = round(humidity , 2) 
-            temperature = round(temperature , 2)
-            #self.write_message(str(humidity))
-            dict_curr_val = {"Temperature": temperature, "Humidity": humidity}
-           # send_data = json.dumps(dict_curr_val)
-            self.write_message(json.dumps(dict_curr_val))
-            
-        elif message == "last ten values fron the python application":
-            humid_ten1 = last_ten_val(mycursor1)
-            print(humid_ten1)
-            self.write_message(str(humid_ten1))
-            
-        
-            
-            
-            
-            #self.write_message(str(temperature))
-       # message = "Server:"+ message 
-       # print('sending back message:',message)
-        #send message from serverr to client
-        #self.write_message(message)
-     
-        #self.write_message(str(humidity))
-        #self.write_message(str(temperature))
-    #When message is recieved from a client call this function and connection is close 
-    def on_close(self):
-        print('connection closed')
- 
-    def check_origin(self, origin):
-        return True
+		
+	def open(self):
+		print('new connection')
+	#When message is recieved from a client call this function and connection is open 
+	def on_message(self, message):
+		if message == "Current values request from client":
+			print('message received:',message)
+			humidity,temperature = Adafruit_DHT.read_retry(DHT_SENSOR,DHT_PIN)
+			
+			if humidity is None and temperature is None:
+				self.write_message(str(1))
+			else:
+				humidity = round(humidity , 2) 
+				temperature = round(temperature , 2)
+				dict_curr_val = {"Temperature": temperature, "Humidity": humidity}
+				self.write_message(json.dumps(dict_curr_val))
+			
+		elif message == "last ten values fron the python application":
+			humid_ten1 = last_ten_val(mycursor1)
+			print(humid_ten1)
+			self.write_message(str(humid_ten1))
+			
+	def on_close(self):
+		print('connection closed')
+
+	def check_origin(self, origin):
+		return True
  
 app1 = tornado.web.Application([
     (r'/ws', WSHandler),
 ])
 
 
-
+#	@param	: mycursor2
+#	@desc	: Function to fetch the last 10 humidity values from the mysql database and return an array. 
 
 def last_ten_val(mycursor2):
 		j=0
@@ -143,16 +132,8 @@ def last_ten_val(mycursor2):
 			humid_ten[count] = npArray[count]
 		
 		print(humid_ten)
-		'''for x in range(0,10):
-			humidity,temperature = Adafruit_DHT.read_retry(DHT_SENSOR,DHT_PIN)
-			humid_ten[x] = humidity
-			print (str(humid_ten[x])+ "\n")'''
 		return humid_ten
 	
-			
-			
-			
-			
 
 						
 class mywindow(QtWidgets.QMainWindow): 

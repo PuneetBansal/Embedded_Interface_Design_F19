@@ -1,3 +1,28 @@
+<!--
+Name		:Application.html
+Author	:Puneet Bansal and Amogh Shrikhande
+Description	: HTML page displaying the current values of temperature and humidity taken from the nodejs server. Along with this the last value from the mysql database is also fetched from the
+nodeJs server and graph of the last 10 humidity values is plotted.  
+References 	:
+          MySQL link : https://pimylifeup.com/raspberry-pi-mysql/
+          Python MYSql link : https://www.w3schools.com/python/python_mysql_create_db.asp
+          For timestamp: https://www.pythonforbeginners.com/basics/python-datetime-timedelta/
+          Temperature Sensor: https://pimylifeup.com/raspberry-pi-humidity-sensor-dht22/
+          Matplotlib: https://matplotlib.org/tutorials/introductory/pyplot.html
+          Primary Key :http://www.mysqltutorial.org/mysql-primary-key/
+          Qtimer: https://doc.qt.io/qtforpython/PySide2/QtCore/QTimer.html
+          Python: https://www.geeksforgeeks.org/python-programming-language/
+          For communication between html client and tornado server: https://os.mbed.com/cookbook/Websockets-Server
+          Tornado basic setup: http://www.tornadoweb.org/en/stable/
+          Creating table on html page: https://www.youtube.com/watch?v=40qreu8Al7o
+          Converting string to javascript dictionary: https://stackoverflow.com/questions/31892971/converting-string-to-javascript-dictionary
+          Shell scripting: https://stackoverflow.com/questions/28549641/run-multiple-python-scripts-concurrently
+          Html graph: https://canvasjs.com/html5-javascript-line-chart/
+          NodeJs talking to mysql: https://www.w3schools.com/nodejs/nodejs_mysql.asp
+          NodeJs Webserver : https://www.pubnub.com/blog/nodejs-websocket-programming-examples/
+-->
+
+
 <!doctype html>
 <html>
   <head>
@@ -59,16 +84,11 @@ tr:nth-child(even) {
     <script src="http://code.jquery.com/jquery.min.js"></script>
     <script>
       
-    
-   
-      
-      
-      
-      
-   
+
    flag =0;
    getval_flag=0;
    celsius=1
+      
       // log function
       log = function(data){
         $("div#terminal").prepend("</br>" +data);
@@ -76,13 +96,9 @@ tr:nth-child(even) {
       };
  
       $(document).ready(function () {
-        $("div#message_details").hide()
- 
-        var ws;
-     
+        $("div#message_details").hide()   
 
-      
-          // ***********this is the code for nodejs
+        // Initialising the websocket connection for nodejs and tornado server. 
           
           const nodejsws = new WebSocket("ws://localhost:9898/");
           tornadows = new WebSocket("ws://localhost:8888/ws");
@@ -107,9 +123,7 @@ tr:nth-child(even) {
               table1 = document.getElementById("table1");
               j=0;
               for(var i=1; i<= table1.rows.length-1;i++)
-              {
-                //console.log(table1.rows.length)
-          
+              {          
               table1.rows[i].cells[0].innerHTML = JSONobj1[j].humid ;   
               j++;    
               
@@ -119,8 +133,8 @@ tr:nth-child(even) {
               {
                   console.log(JSONobj1[i].humid);
               }
-            //enter node js time here
-            
+              
+            // Fetches the end time of transsaction and calculates the total transcation time.
             end_time_node_epoch= new Date();
             end_time_node = end_time_node_epoch.getTime();
             $("#endTime_Node").val(end_time_node);
@@ -150,20 +164,27 @@ tr:nth-child(even) {
             
           };    
         
-          // Node js code ends 
- 
-          // create websocket instance
-          
+         
            
           // Handle incoming websocket message callback
           tornadows.onmessage = function(evt) {
-            //var rec = evt.data.split(",");
+            
+            
+            if(evt.data == "1")
+            {
+              console.log("SENSOR DISCONNECTED");
+              $("#status").val("SENSOR DISCONNECTED");
+            
+            }
+            else{
+              $("#status").val("SENSOR CONNECTED");
+
+            }
+
             if(getval_flag == 1)
             {
               var rec_data = evt.data;
               obj = JSON.parse(rec_data);
-
-              //$("#singleTempTornado").val(obj.Temperature);
               $("#singleHumidTornado").val(obj.Humidity);
               if (celsius==0)
               {
@@ -181,17 +202,14 @@ tr:nth-child(even) {
             else if(getval_flag ==2)
             {
               console.log("Entered required block");
-            amya1 = evt.data;
-            obj1 = JSON.parse(amya1);
-            
-             table = document.getElementById("table");
-            j=0;
+              amya1 = evt.data;
+              obj1 = JSON.parse(amya1);
+              table = document.getElementById("table");
+              j=0;
               for(var i=1; i<= table.rows.length-1;i++)
               {
-          
               table.rows[i].cells[0].innerHTML = obj1[j];
-              j++;    
-            
+              j++;              
               }  
             
             end_time_tornado_epoch= new Date();
@@ -201,15 +219,8 @@ tr:nth-child(even) {
             diff = end_time_tornado - start_time_tornado;
             $("#diffTime_Tornado").val(diff);
             getval_flag=0;
-            
-            //close torando time here 
             }
             
-            
-            
-		//$("#tempo").val(rec[0]);
-		//$("#humid").val(rec[1]);
-           
             };
  
           // Close Websocket callback
@@ -225,33 +236,27 @@ tr:nth-child(even) {
  
           // Open Websocket callback
           tornadows.onopen = function(evt) { 
-            //log("Tornado Client");
           };
 
  
         // Send websocket message function
         $("#send").click(function(evt) {
-            //log("Sending Message: "+$("#message").val());
             tornadows.send($("#message").val());
         });
         
         $("#getval").click(function(evt) {
             getval_flag=1;
-            //log("Current values request from client");
             tornadows.send("Current values request from client");
         }); 
         
         $("#last_ten").click(function(evt) {
-            //log("last ten values fron the python application");
             getval_flag=2;
             var d = new Date();
-            node_start_time = d.getTime();
-            //log(node_start_time);            
+            node_start_time = d.getTime();          
             tornadows.send("last ten values fron the python application");
         });
         
         $("#last_ten_from_nodejs").click(function(evt) {
-            //log("last ten values fron the nodejs server");
             nodejsws.send("last ten values fron the nodejs application");
         });
         
@@ -282,7 +287,6 @@ tr:nth-child(even) {
          });
         
         $("#last_ten_mix").click(function(evt) {
-            //log("last ten values fron the nodejs server");
             getval_flag=2;
             start_time_tornado_epoch= new Date();
             start_time_tornado = start_time_tornado_epoch.getTime(); 
@@ -297,8 +301,6 @@ tr:nth-child(even) {
         
         $("#drawGraph").click(function(evt) {
           
-          //window.onload = function () {
-
             var chart = new CanvasJS.Chart("chartContainer", {
             animationEnabled: true,
             theme: "light2",
@@ -325,10 +327,7 @@ tr:nth-child(even) {
             }]
           });
           chart.render();
-        //}
-
-           
-           
+ 
          });
        
  
@@ -402,7 +401,7 @@ tr:nth-child(even) {
     <label for="diffTime_Tornado" align ="center" >Time Difference</label>
     <output type="text" id="diffTime_Tornado" align ="center" ></output></br>
     
-    
+  
   </div>
   
   <div class="column" style="background-color:#bbb;">
@@ -475,18 +474,16 @@ tr:nth-child(even) {
   </div>
   </div>
   
-   <!-- 
-    <label for="tempo" >Temperature:</label>
-    <output type="text" id="tempo"></output></br>
-    <label for="humid" >Humidity:</label>
-    <output type="text" id="humid"></output></br>
-  -->
     <br>
     
     
     <div id="terminal">
         
     </div>
+    
+    <label for="status" align ="center" >Status:</label>
+    <input type="text" id="status" align ="center" ></output></br>
+    
      <input type="submit" id="F-C" value="F-C" />
      <br>
      <br>

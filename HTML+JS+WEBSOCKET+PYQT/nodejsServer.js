@@ -1,3 +1,10 @@
+/*
+ * Name		      : nodejsServer.js
+   Author	      : Puneet Bansal and Amogh Shrikhande
+   Description	: NodeJs Server that connects to HTML client. Queries the mySQL database and sends the JSON string to client.   
+*/
+
+//MySql Connection
 var mysql = require('mysql');
 var con = mysql.createConnection({
   host: "localhost",
@@ -6,15 +13,11 @@ var con = mysql.createConnection({
   database : "tempAndHumid"
 });
 
+//Function that gets called on getting a connection
 con.connect(function(err) {
   if (err) throw err;
   console.log("Connected!");
-  connected = 1
-  //con.query("SELECT * FROM tempAndHumidValues order by ID desc limit 10",function(err,result,fields){
-  //    if(err) throw err;
-   //   console.log(result);
-   //   JSONstring = JSON.stringify(result);      
-  //});
+  connected = 1;
 });
 
 const http = require('http');
@@ -24,14 +27,16 @@ server.listen(9898);
 const wsServer = new WebSocketServer({
     httpServer: server
 });
+
+//Function that gets called when a message is received from the client. The message received is checked, whether the client is seeking one value or 10 values and the
+//corresponsing values are sent. 
+
 wsServer.on('request', function(request) {
     const connection = request.accept(null, request.origin);
     connection.on('message', function(message) {
       console.log('Received Message:', message.utf8Data);
-      //connection.sendUTF('Hi this is WebSocket server!');
       if(message.utf8Data == "last ten values fron the nodejs application")
       {
-        //console.log(JSONstring);
         if(connected == 1)
         {
           con.query("SELECT * FROM tempAndHumidValues order by ID desc limit 10",function(err,result,fields){
@@ -51,7 +56,6 @@ wsServer.on('request', function(request) {
         console.log(result);
         JSONstring1 = JSON.stringify(result); 
         console.log(JSONstring1);
-        //connection.send("2");
         connection.send(JSONstring1);
         });
       }
