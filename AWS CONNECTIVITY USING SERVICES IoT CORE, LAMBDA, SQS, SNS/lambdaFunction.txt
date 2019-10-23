@@ -1,0 +1,26 @@
+from __future__ import print_function
+  
+import json
+import boto3
+  
+print('Loading function')
+  
+def lambda_handler(event, context):
+    # Parse the JSON message 
+    id = json.dumps(event["id"])
+    # Create an SNS client
+    sns = boto3.client('sns')
+    if id == '"Alarm"':
+      printMessage = json.dumps(event["Message"])
+      # Publish a message to the specified topic
+      response = sns.publish (
+      TopicArn = 'arn:aws:sns:us-east-1:998008274670:EID_PI_SNS',
+      Message = printMessage
+    )
+    
+    if id == '"data"':
+      sqs = boto3.resource('sqs')
+      queue = sqs.get_queue_by_name(QueueName='EID_PI_Queue')
+      response = queue.send_message(MessageBody=json.dumps(event))
+    #print(response)
+  
