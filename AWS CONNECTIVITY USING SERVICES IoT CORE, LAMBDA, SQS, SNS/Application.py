@@ -103,7 +103,7 @@ class mywindow(QtWidgets.QMainWindow):
 				humidity,temperature = Adafruit_DHT.read(DHT_SENSOR,DHT_PIN)
 				if humidity is not None and temperature is not None:
 					break
-						#"id" : "data" , 
+					 
 		if temperature is not None and humidity is not None:
 			humidity = round(humidity , 2) 
 			temperature = round(temperature , 2)
@@ -295,6 +295,8 @@ class mywindow(QtWidgets.QMainWindow):
 			self.ui.DisplayCurrentValue_Timestamp.setText(str(timestamp))
 		else:	
 			self.ui.DisplayCurrentValue_Status.setText("Sensor Disonnected")
+			payload = '{ "id" : "Alarm", "Message": "Sensor Disconnected" }'
+			myMQTTClient.publish("test/temp&humidity", payload, 0)
 			self.ui.DisplayCurrentValue_Temp.setText("NA")
 			self.ui.DisplayCurrentValue_Humid.setText("NA")
 			self.ui.DisplayCurrentValue_Timestamp.setText("NA")

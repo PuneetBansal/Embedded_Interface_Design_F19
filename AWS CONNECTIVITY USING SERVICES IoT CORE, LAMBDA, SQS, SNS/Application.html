@@ -1,8 +1,7 @@
 <!--
-Name		:Application.html
-Author	:Puneet Bansal and Amogh Shrikhande
-Description	: HTML page displaying the current values of temperature and humidity taken from the nodejs server. Along with this the last value from the mysql database is also fetched from the
-nodeJs server and graph of the last 10 humidity values is plotted.  
+Name		    :Application.html
+Author	    :Puneet Bansal and Amogh Shrikhande
+Description	:Connecting the HTML client to AWS IOT Core, SNS, SQS.
 References 	:
           MySQL link : https://pimylifeup.com/raspberry-pi-mysql/
           Python MYSql link : https://www.w3schools.com/python/python_mysql_create_db.asp
@@ -20,6 +19,17 @@ References 	:
           Html graph: https://canvasjs.com/html5-javascript-line-chart/
           NodeJs talking to mysql: https://www.w3schools.com/nodejs/nodejs_mysql.asp
           NodeJs Webserver : https://www.pubnub.com/blog/nodejs-websocket-programming-examples/
+          AWS cost estimator: https://calculator.aws/#/createCalculator
+          Google cost estimator: https://cloud.google.com/products/calculator/#id=f5f2327d-df63-41ac-8615-1c70d2b02d49
+          SNS: https://docs.aws.amazon.com/iot/latest/developerguide/config-and-test-rules.html
+          SQS AWS: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SQS.html#receiveMessage-property
+          SQS attributes: https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-general-identifiers.html
+          Actions SQS: https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_Operations.html
+          Html Table: https://www.w3schools.com/tags/tag_tr.asp
+          JSON documentation: https://api.jquery.com/jQuery.getJSON/
+          AWS login: https://aws.amazon.com/education/awseducate/
+          Management Console: https://console.aws.amazon.com/sqs/home?region=us-east-1
+          
 -->
 
 
@@ -99,13 +109,7 @@ tr:nth-child(even) {
    AttributeNames: [
       "ApproximateNumberOfMessages"
    ],
-   //MaxNumberOfMessages: 20,
-   //MessageAttributeNames: [
-     // "ApproximateNumberOfMessages"
-   //],
    QueueUrl: queueURL,
-   /*VisibilityTimeout: 20,
-   WaitTimeSeconds: 0*/
   };
   
   
@@ -272,8 +276,23 @@ var total_message_count=0;
         });
         
         
-        
+        //function call back for getting single record from sqs
         $("#get_a_single_sqs_record").click(function(evt) {
+            
+          sqs.getQueueAttributes(params, function(err, data) {
+          if (err) 
+          {
+          console.log(err, err.stack); // an error occurred
+          }
+          else
+          {
+          console.log(data);           // successful response
+          var total_message_count = data.Attributes.ApproximateNumberOfMessages;   
+          //console.log("total_message_count",total_message_count);
+          $("#message_status").val(total_message_count);
+          //check = 2;
+          }
+          
             
         console.log("inside the while loop");
         sqs.receiveMessage(params, function(err, data) {
@@ -285,7 +304,19 @@ var total_message_count=0;
           {
           bodyVar = JSON.parse(data.Messages[0].Body);          
           
-            var dataArr = [bodyVar.timestamp, bodyVar.temperature,bodyVar.humidity];
+          if (celsius==0)
+          {
+            
+            var dataArr = [bodyVar.timestamp, (((bodyVar.temperature)*1.8)+32.00), bodyVar.humidity];
+            
+          }
+          
+          else
+          {
+             var dataArr = [bodyVar.timestamp, bodyVar.temperature, bodyVar.humidity];
+          }
+        
+            
             table = document.getElementById("table2");
             for(var column=0; column<3;column++)
             {
@@ -318,7 +349,7 @@ var total_message_count=0;
           }  
         }
         });
-                
+          });
         });
               
           loop =0;
@@ -327,8 +358,30 @@ var total_message_count=0;
           dataArr = [[0,1,2]];
           v2= 1;
           
+          //Call back function for getting the queue message count
+          $("#message_count").click(function(evt) {
+            
+          sqs.getQueueAttributes(params, function(err, data) {
+          if (err) 
+          {
+          console.log(err, err.stack); // an error occurred
+          }
+          else
+          {
+          console.log(data);           // successful response
+          var total_message_count = data.Attributes.ApproximateNumberOfMessages;   
+          //console.log("total_message_count",total_message_count);
+          $("#message_status").val(total_message_count);
+          //check = 2;
+          }            
+           }); 
+            
+          });
+        
+        //Call back function to get all the queue entries from sqs on a button press
         $("#get_all_sqs_record").click(function(evt) {
           v2=1;
+          
           sqs.getQueueAttributes(params, function(err, data) {
           if (err) 
           {
@@ -338,12 +391,10 @@ var total_message_count=0;
           {
           console.log(data);           // successful response
           total_message_count = data.Attributes.ApproximateNumberOfMessages;   
-          console.log("total_message_count",total_message_count);
-          //check = 2;
           }
           
           
-          console.log("message_count",total_message_count);
+          console.log("message_status",total_message_count);
 ;
             table = document.getElementById("table3");
             
@@ -372,10 +423,7 @@ var total_message_count=0;
                 if (err) {
                 console.log("Receive Error", err);
                   } else if (data.Messages) {
-                //var bodyVar = JSON.parse(data.Messages[0].Body);
-                
-                //var dataArr = [bodyVar.timestamp, bodyVar.temperature,bodyVar.humidity];
-                  
+                        
                 var deleteParams = {
                   QueueUrl: queueURL,
                   ReceiptHandle: data.Messages[0].ReceiptHandle
@@ -404,10 +452,6 @@ var total_message_count=0;
             console.log("Receive Error", err);
               } else if (data.Messages) {
             var bodyVar = JSON.parse(data.Messages[0].Body);
-                            console.log("pun")
-
-            //var dataArr = [[0,1,2]];
-            //var var1 =0;
             
             if (celsius==0)
             {
@@ -419,11 +463,9 @@ var total_message_count=0;
           {
              var dataArr = [bodyVar.timestamp, bodyVar.temperature, bodyVar.humidity];
           }
-            //console.log(dataArr);
             
               table = document.getElementById("table3");
               
-              //for(var row=1; row <= total_message_count && row<20 ; row++)
               {
                 for(var col =0; col < 3; col++)
                 {                  
@@ -456,34 +498,19 @@ var total_message_count=0;
           });
           loop = loop+1;
           }
-//          for(i=0;i<row1.length;i++)
-          {
+        
           console.log(dataArr);
-          } 
           
         }        
         
         else
         {
-        console.log("entered else")
-        /*table = document.getElementById("table3");
-            
-            for(var row=1; row<20 ; row++)
-              {
-                for(var col =0; col < 3; col++)
-                {                  
-                table.rows[row].cells[col].innerHTML = 0;
-                }
-                           
-              }*/
+        console.log("entered else");
         return;
         }
         
 
         });     
-          
-          
-        
         });       
         
         
@@ -552,11 +579,8 @@ var total_message_count=0;
           
       
             
-        });
-        
-        
-        
-        
+        });            
+              
         
         
         $("#drawGraph").click(function(evt) {
@@ -757,6 +781,18 @@ var total_message_count=0;
     
     <div style="background-colour:lightblue"></div>
     <h1>Amazon Web Services </h1>
+    
+    <br>
+    <input type="submit" align ="center" id="message_count" value="Message Queue Count" />
+    <label for="message_status" align ="center" > Count:</label>
+    <input type="text" id="message_status" align ="center" ></output></br>
+    </br>
+    
+    
+    <br>
+    <input type="submit" align ="center" id="celsius_far" value="C-F" />
+    </br>
+    
          <br>
     <input type="submit" align ="center" id="get_a_single_sqs_record" value="Single SQS Record" />
          </br>
@@ -888,9 +924,7 @@ var total_message_count=0;
     
     </table>
     
-    <br>
-    <input type="submit" align ="center" id="celsius_far" value="C-F" />
-    </br>
+
     
     
     
