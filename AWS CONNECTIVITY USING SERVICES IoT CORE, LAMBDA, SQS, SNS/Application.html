@@ -1,0 +1,900 @@
+<!--
+Name		:Application.html
+Author	:Puneet Bansal and Amogh Shrikhande
+Description	: HTML page displaying the current values of temperature and humidity taken from the nodejs server. Along with this the last value from the mysql database is also fetched from the
+nodeJs server and graph of the last 10 humidity values is plotted.  
+References 	:
+          MySQL link : https://pimylifeup.com/raspberry-pi-mysql/
+          Python MYSql link : https://www.w3schools.com/python/python_mysql_create_db.asp
+          For timestamp: https://www.pythonforbeginners.com/basics/python-datetime-timedelta/
+          Temperature Sensor: https://pimylifeup.com/raspberry-pi-humidity-sensor-dht22/
+          Matplotlib: https://matplotlib.org/tutorials/introductory/pyplot.html
+          Primary Key :http://www.mysqltutorial.org/mysql-primary-key/
+          Qtimer: https://doc.qt.io/qtforpython/PySide2/QtCore/QTimer.html
+          Python: https://www.geeksforgeeks.org/python-programming-language/
+          For communication between html client and tornado server: https://os.mbed.com/cookbook/Websockets-Server
+          Tornado basic setup: http://www.tornadoweb.org/en/stable/
+          Creating table on html page: https://www.youtube.com/watch?v=40qreu8Al7o
+          Converting string to javascript dictionary: https://stackoverflow.com/questions/31892971/converting-string-to-javascript-dictionary
+          Shell scripting: https://stackoverflow.com/questions/28549641/run-multiple-python-scripts-concurrently
+          Html graph: https://canvasjs.com/html5-javascript-line-chart/
+          NodeJs talking to mysql: https://www.w3schools.com/nodejs/nodejs_mysql.asp
+          NodeJs Webserver : https://www.pubnub.com/blog/nodejs-websocket-programming-examples/
+-->
+
+
+<!doctype html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WebSockets Hello World</title>
+    <meta charset="utf-8" />
+    <style type="text/css">
+      body {
+        text-align: center;
+        min-width: 500px;
+      }
+
+    </style>
+    
+<style>
+      
+* {
+  box-sizing: border-box;
+}
+
+/* Create two equal columns that floats next to each other */
+.column {
+  float: left;
+  width: 50%;
+  padding: 10px;
+/*  height: 300px;  Should be removed. Only for demonstration */
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+#table{
+  table: center;
+  text-align: center;
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+  table: center;
+  text-align: center;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+</style>
+    <script src="http://code.jquery.com/jquery.min.js"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.12.min.js"></script>
+    <script>
+    
+  AWS.config.region = 'us-east-1'; // Region
+  AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+      IdentityPoolId: 'us-east-1:935b4741-4602-4afd-b502-83079e30aa5c',
+  });
+
+  // Create an SQS service object
+  var sqs = new AWS.SQS({apiVersion: '2012-11-05'});
+
+  var queueURL = "https://sqs.us-east-1.amazonaws.com/998008274670/EID_PI_Queue";
+
+  var params = {
+   AttributeNames: [
+      "ApproximateNumberOfMessages"
+   ],
+   //MaxNumberOfMessages: 20,
+   //MessageAttributeNames: [
+     // "ApproximateNumberOfMessages"
+   //],
+   QueueUrl: queueURL,
+   /*VisibilityTimeout: 20,
+   WaitTimeSeconds: 0*/
+  };
+  
+  
+var check =1;
+var total_message_count=0;
+
+   flag =0;
+   getval_flag=0;
+   celsius=1
+      
+      // log function
+      log = function(data){
+        $("div#terminal").prepend("</br>" +data);
+        console.log(data);
+      };
+ 
+      $(document).ready(function () {
+        $("div#message_details").hide()   
+
+        // Initialising the websocket connection for nodejs and tornado server. 
+          
+          const nodejsws = new WebSocket("ws://localhost:9898/");
+          tornadows = new WebSocket("ws://localhost:8888/ws");
+
+          //const nodejsws = new WebSocket("ws://10.201.70.169:9898/");
+          //tornadows = new WebSocket("ws://10.201.70.169:8888/ws");
+          
+          
+          nodejsws.onopen = function() {
+          console.log('NodeJs Client Connected');
+          nodejsws.send('Hi this is web client.');
+          };
+          
+          nodejsws.onmessage = function(e) {
+            JSONstring = e.data;
+            JSONobj1 = JSON.parse(JSONstring);
+            len= JSONobj1.length
+    
+            if(len > 1)
+            {
+              
+              table1 = document.getElementById("table1");
+              j=0;
+              for(var i=1; i<= table1.rows.length-1;i++)
+              {          
+              table1.rows[i].cells[0].innerHTML = JSONobj1[j].humid ;   
+              j++;    
+              
+              }              
+            
+              for(i =0 ;i < JSONobj1.length; i++)
+              {
+                  console.log(JSONobj1[i].humid);
+              }
+              
+            // Fetches the end time of transsaction and calculates the total transcation time.
+            end_time_node_epoch= new Date();
+            end_time_node = end_time_node_epoch.getTime();
+            $("#endTime_Node").val(end_time_node);
+            diff1 = end_time_node - start_time_node;
+            $("#diffTime_Node").val(diff1);
+
+            }
+            
+            else
+            {
+              if (celsius==0)
+              {
+                $("#singleTempNode").val(((JSONobj1[0].temp)*1.8) + 32.00);
+              }
+          
+              else
+              {
+                $("#singleTempNode").val(JSONobj1[0].temp);
+              }
+            
+            //$("#singleTempNode").val(JSONobj1[0].temp);
+            $("#singleHumidNode").val(JSONobj1[0].humid);
+            console.log(JSONobj1[0].humid);            
+            console.log(JSONobj1[0].temp);
+           
+            }
+            
+          };    
+        
+         
+           
+          // Handle incoming websocket message callback
+          tornadows.onmessage = function(evt) {
+            
+            
+            if(evt.data == "1")
+            {
+              console.log("SENSOR DISCONNECTED");
+              $("#status").val("SENSOR DISCONNECTED");
+            
+            }
+            else{
+              $("#status").val("SENSOR CONNECTED");
+
+            }
+
+            if(getval_flag == 1)
+            {
+              var rec_data = evt.data;
+              obj = JSON.parse(rec_data);
+              $("#singleHumidTornado").val(obj.Humidity);
+              if (celsius==0)
+              {
+                $("#singleTempTornado").val(((obj.Temperature)*1.8) + 32.00);
+              }
+          
+              else
+              {
+                $("#singleTempTornado").val(obj.Temperature);
+              }
+            getval_flag=0
+            }
+            
+
+            else if(getval_flag ==2)
+            {
+              console.log("Entered required block");
+              amya1 = evt.data;
+              obj1 = JSON.parse(amya1);
+              table = document.getElementById("table");
+              j=0;
+              for(var i=1; i<= table.rows.length-1;i++)
+              {
+              table.rows[i].cells[0].innerHTML = obj1[j];
+              j++;              
+              }  
+            
+            end_time_tornado_epoch= new Date();
+            console.log(end_time_tornado_epoch);
+            end_time_tornado = end_time_tornado_epoch.getTime();
+            $("#endTime_Tornado").val(end_time_tornado);
+            diff = end_time_tornado - start_time_tornado;
+            $("#diffTime_Tornado").val(diff);
+            getval_flag=0;
+            }
+            
+            };
+ 
+          // Close Websocket callback
+          tornadows.onclose = function(evt) {
+            //log("***Connection Closed***");
+            //alert("Connection close");
+            $("#host").css("background", "#ff0000"); 
+            $("#port").css("background", "#ff0000"); 
+            $("#uri").css("background",  "#ff0000");
+            $("div#message_details").empty();
+ 
+            };
+ 
+          // Open Websocket callback
+          tornadows.onopen = function(evt) { 
+          };
+
+ 
+        // Send websocket message function
+        $("#send").click(function(evt) {
+            tornadows.send($("#message").val());
+        });
+        
+        
+        
+        $("#get_a_single_sqs_record").click(function(evt) {
+            
+        console.log("inside the while loop");
+        sqs.receiveMessage(params, function(err, data) {
+          if (err) {
+          console.log("Receive Error", err);
+            } else if (data.Messages) {
+          var len = data.Messages.length;
+          if(len !=0)
+          {
+          bodyVar = JSON.parse(data.Messages[0].Body);          
+          
+            var dataArr = [bodyVar.timestamp, bodyVar.temperature,bodyVar.humidity];
+            table = document.getElementById("table2");
+            for(var column=0; column<3;column++)
+            {
+            table.rows[1].cells[column].innerHTML = dataArr[column];
+                         
+            } 
+
+            var deleteParams = {
+              QueueUrl: queueURL,
+              ReceiptHandle: data.Messages[0].ReceiptHandle
+            };
+            sqs.deleteMessage(deleteParams, function(err, data) {
+              if (err) {
+              console.log("Delete Error", err);
+              } else {
+              console.log("Message Deleted", data);
+              }
+            });
+          }
+          else
+          {
+            console.log("entered else");
+            table = document.getElementById("table2");
+            for(var column=0; column<3;column++)
+            {
+            table.rows[1].cells[column].innerHTML = 0;
+                         
+            }
+            return;
+          }  
+        }
+        });
+                
+        });
+              
+          loop =0;
+          loop1 =0;
+          message_to_delete = 0;
+          dataArr = [[0,1,2]];
+          v2= 1;
+          
+        $("#get_all_sqs_record").click(function(evt) {
+          v2=1;
+          sqs.getQueueAttributes(params, function(err, data) {
+          if (err) 
+          {
+          console.log(err, err.stack); // an error occurred
+          }
+          else
+          {
+          console.log(data);           // successful response
+          total_message_count = data.Attributes.ApproximateNumberOfMessages;   
+          console.log("total_message_count",total_message_count);
+          //check = 2;
+          }
+          
+          
+          console.log("message_count",total_message_count);
+;
+            table = document.getElementById("table3");
+            
+            for(var row=1; row<=20 ; row++)
+              {
+                for(var col =0; col < 3; col++)
+                {                  
+                table.rows[row].cells[col].innerHTML = 0;
+                }
+                           
+              }
+          
+          
+          if(total_message_count != 0)
+          {
+               
+            
+            if(total_message_count >20)
+            {
+              message_to_delete = (total_message_count - 20);                  
+             var loop1 = 0;
+              while(loop1 < message_to_delete)
+              {
+              console.log("inside the while 1 loop");
+              sqs.receiveMessage(params, function(err, data) {
+                if (err) {
+                console.log("Receive Error", err);
+                  } else if (data.Messages) {
+                //var bodyVar = JSON.parse(data.Messages[0].Body);
+                
+                //var dataArr = [bodyVar.timestamp, bodyVar.temperature,bodyVar.humidity];
+                  
+                var deleteParams = {
+                  QueueUrl: queueURL,
+                  ReceiptHandle: data.Messages[0].ReceiptHandle
+                };
+                sqs.deleteMessage(deleteParams, function(err, data) {
+                  if (err) {
+                  console.log("Delete Error", err);
+                  } else {
+                  console.log("Message Deleted", data);
+                  }
+                });
+                }
+              });
+              loop1 = loop1+1;
+              }                    
+            }
+          
+          check = ((total_message_count)- (message_to_delete))
+        
+          var loop= 0;
+          while(loop < ((total_message_count)- (message_to_delete)))
+          {
+          console.log("inside the while loop 2");
+          sqs.receiveMessage(params, function(err, data) {
+            if (err) {
+            console.log("Receive Error", err);
+              } else if (data.Messages) {
+            var bodyVar = JSON.parse(data.Messages[0].Body);
+                            console.log("pun")
+
+            //var dataArr = [[0,1,2]];
+            //var var1 =0;
+            
+            if (celsius==0)
+            {
+            var dataArr = [bodyVar.timestamp, (((bodyVar.temperature)*1.8)+32.00), bodyVar.humidity];
+            
+          }
+          
+          else
+          {
+             var dataArr = [bodyVar.timestamp, bodyVar.temperature, bodyVar.humidity];
+          }
+            //console.log(dataArr);
+            
+              table = document.getElementById("table3");
+              
+              //for(var row=1; row <= total_message_count && row<20 ; row++)
+              {
+                for(var col =0; col < 3; col++)
+                {                  
+                table.rows[v2].cells[col].innerHTML = dataArr[col];
+                //row1[loop][col] = dataArr[col];
+                //row1[loop_test+col] = dataArr[col];
+                //dataArr[v2][0] = bodyVar.timestamp;
+                //dataArr[v2][1] = bodyVar.temperature;
+                //dataArr[v2][2] = bodyVar.humidity;
+                //v2 = v2+1;
+                //console.log("pun1")
+                }
+                v2 = v2+1;
+                           
+              }
+              
+              
+            var deleteParams = {
+              QueueUrl: queueURL,
+              ReceiptHandle: data.Messages[0].ReceiptHandle
+            };
+            sqs.deleteMessage(deleteParams, function(err, data) {
+              if (err) {
+              console.log("Delete Error", err);
+              } else {
+              console.log("Message Deleted", data);
+              }
+            });
+            }
+          });
+          loop = loop+1;
+          }
+//          for(i=0;i<row1.length;i++)
+          {
+          console.log(dataArr);
+          } 
+          
+        }        
+        
+        else
+        {
+        console.log("entered else")
+        /*table = document.getElementById("table3");
+            
+            for(var row=1; row<20 ; row++)
+              {
+                for(var col =0; col < 3; col++)
+                {                  
+                table.rows[row].cells[col].innerHTML = 0;
+                }
+                           
+              }*/
+        return;
+        }
+        
+
+        });     
+          
+          
+        
+        });       
+        
+        
+        
+        $("#getval").click(function(evt) {
+            getval_flag=1;
+            tornadows.send("Current values request from client");
+        }); 
+        
+        $("#last_ten").click(function(evt) {
+            getval_flag=2;
+            var d = new Date();
+            node_start_time = d.getTime();          
+            tornadows.send("last ten values fron the python application");
+        });
+        
+        $("#last_ten_from_nodejs").click(function(evt) {
+            nodejsws.send("last ten values fron the nodejs application");
+        });
+        
+    
+        $("#F-C").click(function(evt) {
+          
+          celsius = !celsius  
+          if (celsius==0)
+          {
+            $("#singleTempTornado").val(((obj.Temperature)*1.8) + 32.00);
+            $("#singleTempNode").val(((JSONobj1[0].temp)*1.8) + 32.00);
+            
+          }
+          
+          else
+          {
+            $("#singleTempTornado").val(obj.Temperature);
+            $("#singleTempNode").val(JSONobj1[0].temp);
+          }
+          
+        });
+        
+        
+         $("#latest_from_nodejs").click(function(evt) {
+           console.log("Latest value from nodejs")
+          nodejsws.send("latest values fron the nodejs application");
+           
+         });
+        
+        $("#last_ten_mix").click(function(evt) {
+            getval_flag=2;
+            start_time_tornado_epoch= new Date();
+            start_time_tornado = start_time_tornado_epoch.getTime(); 
+            $("#startTime_Tornado").val(start_time_tornado);
+            nodejsws.send("last ten values fron the nodejs application");
+            
+            start_time_node_epoch= new Date();
+            start_time_node = start_time_node_epoch.getTime();
+            $("#startTime_Node").val(start_time_node);
+            tornadows.send("last ten values fron the python application");
+        });
+        
+        
+          $("#celsius_far").click(function(evt) {
+      
+            
+            celsius = !celsius  
+         
+          
+      
+            
+        });
+        
+        
+        
+        
+        
+        
+        $("#drawGraph").click(function(evt) {
+          
+            var chart = new CanvasJS.Chart("chartContainer", {
+            animationEnabled: true,
+            theme: "light2",
+            title:{
+            text: "Humidity Graph From Tornado"
+            },
+            axisY:{
+            includeZero: false
+            },
+            data: [{        
+            type: "line",       
+            dataPoints: [
+              { y: obj1[0]},
+              { y: obj1[1]},
+              { y: obj1[2]},
+              { y: obj1[3]},
+              { y: obj1[4]},
+              { y: obj1[5]},
+              { y: obj1[6]},
+              { y: obj1[7]},
+              { y: obj1[8]},
+              { y: obj1[9]}
+              ]
+            }]
+          });
+          chart.render();
+ 
+         });
+       
+ 
+      });
+    </script>
+  </head>
+ 
+  <body>
+    
+    <h1>Temperature and Humidity Control </h1>
+    <div class="row">
+    <div class="column" style="background-color:#aaa;">
+    <h2>Tornado Webserver</h2>
+    
+    <label for="singleTempTornado" >Temperature:</label>
+    <input type="text" id="singleTempTornado"></output></br>
+    <br>
+    <label for="singleHumidTornado" align ="center" >Humidity           :</label>
+    <input type="text" id="singleHumidTornado" align ="center" ></output></br>
+    <br>
+    <input type="submit" align ="center" id="getval" value="Latest Values" />	
+    <br>
+    <br>
+    
+    <input type="submit" id="last_ten" value="Last 10 Humidity Values" />
+    
+    <h2>Last 10 Humidity Values Data</h2>
+
+    <table id ="table" border = "3" width ="15%" height = "60px">
+      <tr>
+        <th>Humidity</th>
+      </tr>
+      <tr>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+      </tr>
+      <tr>
+        <td></td>
+      </tr>
+    </table>
+
+    <label for="startTime_Tornado" align ="center" >Start Time</label>
+    <output type="text" id="startTime_Tornado" align ="center" ></output></br>
+    
+    <label for="endTime_Tornado" align ="center" >End Time</label>
+    <output type="text" id="endTime_Tornado" align ="center" ></output></br>
+    
+    <label for="diffTime_Tornado" align ="center" >Time Difference</label>
+    <output type="text" id="diffTime_Tornado" align ="center" ></output></br>
+    
+  
+  </div>
+        
+  <div class="column" style="background-color:#bbb;">
+    <h2>Node Js Webserver</h2>
+    <form>
+    <label for="singleTempNode" align = "left">Temperature:</label>
+    <input type="text" id="singleTempNode" align ="left"></output></br>
+    <br>
+    
+    <label for="singleHumidNode" align ="center" >Humidity:</label>
+    <input type="text" id="singleHumidNode" align ="center" ></output></br>
+    </form>
+    <br>
+  
+  
+  
+    <input type="submit" align ="center" id="latest_from_nodejs" value="Latest Values" />	
+    <br>
+    <br>
+    <input type="submit" align ="center" id="last_ten_from_nodejs" value="Last 10 Humidity Values" />
+    
+    
+    <h2>Last 10 Humidity Values Data</h2>
+
+<table id ="table1" border = "3" width ="20%" height = "100px">
+  <tr>
+    <th>Humidity</th>
+  </tr>
+  <tr>
+    <td> </td>
+  </tr>
+  <tr>
+    <td> </td>
+  </tr>
+  <tr>
+    <td> </td>
+  </tr>
+  <tr>
+    <td> </td>
+  </tr>
+  <tr>
+    <td> </td>
+  </tr>
+  <tr>
+    <td> </td>
+  </tr>
+  <tr>
+    <td> </td>
+  </tr>
+  <tr>
+    <td> </td>
+  </tr>
+  <tr>
+    <td> </td>
+  </tr>
+  <tr>
+    <td> </td>
+  </tr>
+</table>
+
+   <label for="startTime_Node" align ="center" >Start Time</label>
+    <output type="text" id="startTime_Node" align ="center" ></output></br>
+    
+    <label for="endTime_Node" align ="center" >End Time</label>
+    <output type="text" id="endTime_Node" align ="center" ></output></br>
+    
+    <label for="diffTime_Node" align ="center" >Time Difference</label>
+    <output type="text" id="diffTime_Node" align ="center" ></output></br>
+        
+  </div>
+  </div>
+  
+    <br>
+    
+    
+    <div id="terminal">
+        
+    </div>
+    
+    <label for="status" align ="center" >Status:</label>
+    <input type="text" id="status" align ="center" ></output></br>
+    
+     <input type="submit" id="F-C" value="F-C" />
+     <br>
+     <br>
+     <input type="submit" align ="left" id="last_ten_mix" value="Last 10 Values" />
+     <br>
+     <br>
+      <input type="submit" align ="center" id="drawGraph" value="Plot Graph" />	
+     
+     <div id="chartContainer" style="height: 370px; width: 100%;"></div>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    
+    <div style="background-colour:lightblue"></div>
+    <h1>Amazon Web Services </h1>
+         <br>
+    <input type="submit" align ="center" id="get_a_single_sqs_record" value="Single SQS Record" />
+         </br>
+      
+    <table id ="table2" border = "3" width ="20%" height = "100px">
+    <tr>
+     <th>Timestamp</th>
+     <th>Temperature</th>
+     <th>Humidity</th>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    </table>
+    
+    
+    <br>
+    <input type="submit" align ="center" id="get_all_sqs_record" value="All SQS Record" />
+    </br>
+    
+    <table id ="table3" border = "3" width ="20%" height = "100px">
+    <tr>
+     <th>Timestamp</th>
+     <th>Temperature</th>
+     <th>Humidity</th>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    <tr>
+     <td> </td>
+     <td> </td>
+     <td> </td>
+    </tr>
+    
+    </table>
+    
+    <br>
+    <input type="submit" align ="center" id="celsius_far" value="C-F" />
+    </br>
+    
+    
+    
+  </body>
+
+  
+</html>
