@@ -1,5 +1,8 @@
-#playing audio files in python : https://raspberrypi.stackexchange.com/questions/7088/playing-audio-files-with-python
-
+'''
+Name		:Application_client.py
+Author		:Puneet Bansal and Amogh Shrikhande
+Reference	:playing audio files in python : https://raspberrypi.stackexchange.com/questions/7088/playing-audio-files-with-python
+'''
 import boto3
 import os 
 import vlc
@@ -13,7 +16,8 @@ import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(11, GPIO.IN)
 
-# ************image detection:*****************************************
+#	@param	: photo,bucket
+#	@desc	: Function to detect label of the image passed to it.
 def detect_labels(photo, bucket):
     name = None
     max_confidence = 0.00
@@ -39,11 +43,10 @@ def detect_labels(photo, bucket):
     name = name + " .huh."
     text_to_speech(name)
     return len(response['Labels'])
-#******************Image detection end*************************************
 
 
-#*******************text to speech start*****************************************
-#text= "hello wassup .huh."
+#	@param	: name
+#	@desc	: Function to convert text to speech.
 def text_to_speech(name):
     client1=boto3.client('polly')
     response = client1.synthesize_speech(VoiceId='Joanna',
@@ -58,13 +61,16 @@ def text_to_speech(name):
     mixer.music.play()
     while mixer.music.get_busy() == True:
         continue
-    #p= vlc.MediaPlayer("/home/pi/EID/project5/speech.mp3")
-    #p.play()
-#******************text to speech end**************************************
+   
 
+#	@param	: none
+#	@desc	: Function that takes audio input from microphone.
 def take_voice_input():
     os.system("arecord -D plughw:1,0 -d 3 /home/pi/EID/project5/voiceinput.wav -r 16000 -f S16_LE -t wav")
 
+
+#	@param	: none
+#	@desc	: Function to convert speech to text
 def voice_to_text():
     vtotext_client =boto3.client('lex-runtime') 
     take_voice_input()
