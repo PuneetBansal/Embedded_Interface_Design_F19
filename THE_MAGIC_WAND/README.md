@@ -74,6 +74,13 @@ pip3 install AWSIoTPythonSDK
 * NodeJs talking to mysql: https://www.w3schools.com/nodejs/nodejs_mysql.asp
 * SQS AWS: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SQS.html#receiveMessage-property
 * AWS login: https://aws.amazon.com/education/awseducate/ 
+*	Playing audio files in python: https://raspberrypi.stackexchange.com/questions/7088/playing-audio-files-with-python 
+*	Configuring amazon lex using boto3: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/lex-runtime.html#LexRuntimeService.Client.post_content 
+*	Setting up amazon lex bot: https://www.youtube.com/watch?v=Gy0C9g16DW0 
+*	Setting up aws text to speech (polly): https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/polly.html#Polly.Client.syn thesize_speech 
+*	Interfacing camera with Rpi3: https://projects.raspberrypi.org/en/projects/getting-started-with-picamera 
+*	Interfacing usb microphone with Rpi3: https://raspberrytips.com/add-microphone-raspberry-pi
+
 
 
 
